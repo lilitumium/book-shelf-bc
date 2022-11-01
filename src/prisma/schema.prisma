@@ -1,0 +1,76 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id            Int          @id @default(autoincrement())
+  email         String       @unique
+  firstName     String
+  lastName      String
+  password      String
+  favoriteBooks Book[]
+  collections   Collection[]
+  Comment       Comment[]
+}
+
+model Book {
+  id          Int                  @id @default(autoincrement())
+  title       String
+  authors     String?
+  categories  String?
+  thumbnail   String?
+  published   String?
+  createdAt   DateTime             @default(now())
+  tags        Tag[]
+  collections BooksInCollections[]
+  User        User?                @relation(fields: [userId], references: [id])
+  userId      Int?
+  comments    Comment[]
+}
+
+model Collection {
+  id         Int                  @id @default(autoincrement())
+  title      String
+  thumbnail  String?
+  creator    User?                @relation(fields: [creatorId], references: [id])
+  creatorId  Int?                 @default(1)
+  createdAt  DateTime             @default(now())
+  modifiedAt DateTime             @default(now())
+  books      BooksInCollections[]
+  tagId      Int?
+  tag        Tag?                 @relation(fields: [tagId], references: [id])
+}
+
+model BooksInCollections {
+  id           Int        @id @default(autoincrement())
+  collection   Collection @relation(fields: [collectionId], references: [id])
+  collectionId Int
+  book         Book       @relation(fields: [bookId], references: [id])
+  bookId       Int
+}
+
+model Tag {
+  id         Int          @id @default(autoincrement())
+  title      String
+  createdAt  DateTime     @default(now())
+  books      Book[]
+  Collection Collection[]
+}
+
+model Comment {
+  id        Int      @id @default(autoincrement())
+  content   String
+  createdAt DateTime @default(now())
+  Book      Book?    @relation(fields: [bookId], references: [id])
+  bookId    Int?
+  user      User?    @relation(fields: [userId], references: [id])
+  userId    Int?
+}
